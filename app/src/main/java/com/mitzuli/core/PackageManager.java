@@ -153,7 +153,9 @@ public abstract class PackageManager<T extends Package> {
         }
 
         final Set<String> savedValues = new TreeSet<String>(prefs.getAll().keySet());
-        for (int i = 0; i < packages.size(); i++) savedValues.remove(INSTALLED_VERSION_PREFIX + packages.get(i).getId());
+        for (T aPackage : packages) {
+            savedValues.remove(INSTALLED_VERSION_PREFIX + aPackage.getId());
+        }
         for (final String value : savedValues) {
             if (value.startsWith(INSTALLED_VERSION_PREFIX)) {
                 final String id = value.substring(INSTALLED_VERSION_PREFIX.length());

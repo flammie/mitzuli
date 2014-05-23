@@ -45,8 +45,9 @@ public class PackageManagers {
     private static final String BETA_MT_PACKAGES_MANIFEST_URL = "http://sourceforge.net/projects/mitzuli/files/packages/mt/beta/manifest/download";
     private static final String RELEASED_MT_PACKAGES_MANIFEST_URL = "http://sourceforge.net/projects/mitzuli/files/packages/mt/released/manifest/download";
     private static final String OCR_PACKAGES_MANIFEST_URL = "http://sourceforge.net/projects/mitzuli/files/packages/ocr/manifest/download";
+    private static final String ABUMATRAN_MT_PACKAGES_MANIFEST_URL = "http://github.com/flammie/mitzuli/";
 
-    public static MtPackageManager betaMtPackageManager, releasedMtPackageManager;
+    public static MtPackageManager betaMtPackageManager, releasedMtPackageManager, abumatranMtPackageManager;
     public static OcrPackageManager ocrPackageManager;
 
     public static interface ManifestsUpdateCallback {
@@ -71,6 +72,12 @@ public class PackageManagers {
                 new File(context.getCacheDir(), "ocr_packages"),
                 context.getSharedPreferences("ocr_packages", Context.MODE_PRIVATE),
                 new BufferedReader(new InputStreamReader(context.getResources().openRawResource(R.raw.ocr_packages_manifest))));
+
+        abumatranMtPackageManager = new MtPackageManager(
+                new File(context.getFilesDir(), "abumatran_mt_packages"),
+                new File(context.getCacheDir(), "abumatran_mt_packages"),
+                context.getSharedPreferences("abumatran_mt_packages", Context.MODE_PRIVATE),
+                new BufferedReader(new InputStreamReader(context.getResources().openRawResource(R.raw.abumatran_mt_packages_manifest))));
     }
 
     public static String getName(Locale locale) {

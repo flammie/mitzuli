@@ -78,20 +78,27 @@ public class MtPackage extends Package {
 
     public void translate(final String text, final boolean markUnknown, final TranslationCallback translationCallback, final ExceptionCallback exceptionCallback) {
         markUsage();
+
         if (getPackageDir() != null) {
             translationTask = new TranslationTask(markUnknown, translationCallback, exceptionCallback);
             translationTask.execute(text);
         } else {
             final XMLRPCCallback callback = new XMLRPCCallback() {
-                @Override public void onResponse(long id, Object result) {
-                    translationCallback.onTranslationDone((String)result);
+                @Override
+                public void onResponse(long id, Object result) {
+                    translationCallback.onTranslationDone((String) result);
                 }
-                @Override public void onError(long id, XMLRPCException e) {
+
+                @Override
+                public void onError(long id, XMLRPCException e) {
                     translateFromCache(e);
                 }
-                @Override public void onServerError(long id, XMLRPCServerException e) {
+
+                @Override
+                public void onServerError(long id, XMLRPCServerException e) {
                     translateFromCache(e);
                 }
+
                 private void translateFromCache(Exception e) {
                     if (isInstallable()) {
                         installToCache(
@@ -103,14 +110,15 @@ public class MtPackage extends Package {
                                         translationTask.execute(text);
                                     }
                                 },
-                                exceptionCallback);
+                                exceptionCallback
+                        );
                     } else {
                         exceptionCallback.onException(new Exception("Apertium web service failed and package not installable", e));
                     }
                 }
             };
             try {
-                new XMLRPCClient(new URL(Keys.APERTIUM_API_URL)).callAsync(callback, "service.translate", text, "txt", getId().split("-")[0], getId().split("-")[1], markUnknown, Keys.APERTIUM_API_KEY);
+                new XMLRPCClient(new URL(Keys.ABUMATRAN_API_URL)).callAsync(callback, "translate", text, "txt", getId().split("-")[0], getId().split("-")[1], markUnknown, Keys.ABUMATRAN_API_KEY);
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e); // We should never reach this
             }

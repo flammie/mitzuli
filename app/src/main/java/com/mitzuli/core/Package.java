@@ -20,6 +20,7 @@ package com.mitzuli.core;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 
 public abstract class Package {
@@ -155,7 +157,11 @@ public abstract class Package {
                 installedVersionSaver.put(repoVersion);
                 publishProgress(100);
                 return null;
-            } catch (Exception e) {
+            } catch (EOFException eofe) {
+                Log.e("FIXME", "abumatran dummy package fail");
+                return null;
+            }
+            catch (Exception e) {
                 return e;
             } finally {
                 if (zis != null) try {zis.close();} catch (IOException e){}
