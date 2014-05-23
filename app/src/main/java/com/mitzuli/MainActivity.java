@@ -19,6 +19,8 @@
 package com.mitzuli;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +32,7 @@ import com.mitzuli.core.mt.MtPackage;
 import com.mitzuli.core.ocr.OcrPackage;
 import com.mitzuli.core.tts.Tts;
 
-import org.acra.ACRA;
+//import org.acra.ACRA;
 import org.opencv.android.OpenCVLoader;
 
 import com.f2prateek.progressbutton.ProgressButton;
@@ -47,6 +49,7 @@ import android.graphics.Bitmap;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -161,10 +164,16 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 
     private Package.ExceptionCallback exceptionCallback = new Package.ExceptionCallback() {
         @Override public void onException(Exception exception) {
-            ACRA.getErrorReporter().handleSilentException(exception);
+            StringWriter writer = new StringWriter();
+            PrintWriter printWriter = new PrintWriter( writer );
+            exception.printStackTrace( printWriter );
+            printWriter.flush();
+
+            String stackTrace = writer.toString();
+            Log.e("EXCEPTION", stackTrace);
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle(R.string.error_dialog_title)
-                    .setMessage(exception.getLocalizedMessage())
+                    .setMessage(stackTrace)
                     .setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
                         @Override public void onClick(DialogInterface dialog, int id) {
                             dialog.dismiss();
@@ -503,7 +512,13 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
 
     private void refreshLanguagePairs() {
         languagePairs = new ArrayList<LanguagePair>();
-        for (MtPackage translatorPackage : PackageManagers.releasedMtPackageManager.getAllPackages()) {
+        for (MtPackage translatorPackage : PackageManagers.abumatranMtPackageManager.getAllPackages()) {
+            languagePairs.add(new LanguagePair(
+                    PackageManagers.getName(translatorPackage.getSourceLanguage()) + " → " + PackageManagers.getName(translatorPackage.getTargetLanguage()),
+                    translatorPackage,
+                    PackageManagers.ocrPackageManager.getPackageForLanguage(translatorPackage.getSourceLanguage())));
+        }
+        /*for (MtPackage translatorPackage : PackageManagers.abumatranMtPackageManager.getAllPackages()) {
             languagePairs.add(new LanguagePair(
                     PackageManagers.getName(translatorPackage.getSourceLanguage()) + " → " + PackageManagers.getName(translatorPackage.getTargetLanguage()),
                     translatorPackage,
@@ -516,7 +531,8 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
                         translatorPackage,
                         PackageManagers.ocrPackageManager.getPackageForLanguage(translatorPackage.getSourceLanguage())));
             }
-        }
+        }*/
+
         Collections.sort(languagePairs);
         getSupportActionBar().setListNavigationCallbacks(new LanguagePairAdapter(MainActivity.this), this);
 
