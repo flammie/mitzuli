@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -45,6 +47,7 @@ import de.timroes.axmlrpc.XMLRPCException;
 import de.timroes.axmlrpc.XMLRPCServerException;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 
 public class MtPackage extends Package {
@@ -79,14 +82,17 @@ public class MtPackage extends Package {
     public void translate(final String text, final boolean markUnknown, final TranslationCallback translationCallback, final ExceptionCallback exceptionCallback) {
         markUsage();
 
-        if (getPackageDir() != null) {
-            translationTask = new TranslationTask(markUnknown, translationCallback, exceptionCallback);
-            translationTask.execute(text);
-        } else {
+//        if () {
+//            translationTask = new TranslationTask(markUnknown, translationCallback, exceptionCallback);
+//            translationTask.execute(text);
+//        } else {
             final XMLRPCCallback callback = new XMLRPCCallback() {
                 @Override
                 public void onResponse(long id, Object result) {
-                    translationCallback.onTranslationDone((String) result);
+                    HashMap<String, String> foo = (HashMap<String, String>) result;
+                    String arr = foo.get("text");
+                    Log.d("XMLRPCRESP", arr);
+                    translationCallback.onTranslationDone(arr);
                 }
 
                 @Override
@@ -96,6 +102,7 @@ public class MtPackage extends Package {
 
                 @Override
                 public void onServerError(long id, XMLRPCServerException e) {
+                    Log.e("EXCEPTION", e.getMessage());
                     translateFromCache(e);
                 }
 
@@ -118,11 +125,19 @@ public class MtPackage extends Package {
                 }
             };
             try {
-                new XMLRPCClient(new URL(Keys.ABUMATRAN_API_URL)).callAsync(callback, "translate", text, "txt", getId().split("-")[0], getId().split("-")[1], markUnknown, Keys.ABUMATRAN_API_KEY);
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("text", text);
+                params.put("format", "txt");
+                params.put("sourceLang", getId().split("-")[0]);
+                params.put("targetLang", getId().split("-")[1]);
+                params.put("markUnknown", "0");
+                params.put("key", Keys.ABUMATRAN_API_KEY);
+                new XMLRPCClient(new URL(Keys.ABUMATRAN_API_URL)).callAsync(callback, "translate",
+                        params);
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e); // We should never reach this
             }
-        }
+//        }
     }
 
     private class TranslationTask extends AsyncTask<String, Void, String> {
@@ -142,7 +157,7 @@ public class MtPackage extends Package {
         protected String doInBackground(String... text) {
             try {
                 final File packageDir = getPackageDir();
-                if (packageDir == null) throw new Exception("Package not installed.");
+                if (packageDir == null) return null;
                 Translator.setDisplayMarks(markUnknown);
                 Translator.setBase(packageDir.getAbsolutePath(), getClassLoader(packageDir));
                 Translator.setMode(getId());

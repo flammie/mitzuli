@@ -159,6 +159,7 @@ public abstract class Package {
                 return null;
             } catch (EOFException eofe) {
                 Log.e("FIXME", "abumatran dummy package fail");
+                deleteAll(tmpDir);
                 return null;
             }
             catch (Exception e) {

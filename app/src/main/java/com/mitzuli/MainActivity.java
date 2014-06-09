@@ -158,7 +158,7 @@ public class MainActivity extends ActionBarActivity implements OnClickListener, 
             trgContent.removeAllViews();
             trgContent.setGravity(Gravity.TOP);
             trgContent.addView(trgTextScroll);
-            trgText.setText(Html.fromHtml(translation));
+            trgText.setText(translation);
         }
     };
 
