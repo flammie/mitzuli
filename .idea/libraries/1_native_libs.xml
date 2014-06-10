@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="1_native-libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/build/intermediates/exploded-aar/mitzuli.libraries/tesseract-android-tools/unspecified/libs/native-libs.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
