@@ -27,6 +27,8 @@ public class Keys {
     public static final String APERTIUM_APY_URL = "http://apy.projectjj.com";
     public static final String APERTIUM_XMLRPC_URL = "http://api.apertium.org/xmlrpc";
     public static final String APERTIUM_API_KEY = "";
+    public static final String ABUMATRAN_XMLRPC_URL = "http://abumatran.eu:54990/RPC2";
+    public static final String ABUMATRAN_API_KEY = "";
 
     public static final String ACRA_FORM_URI = "";
     public static final String ACRA_FORM_KEY = "";

@@ -235,7 +235,7 @@ public class MtPackage extends Package {
                 params.put("markUnknown", "0");
                 params.put("key", Keys.ABUMATRAN_API_KEY);
                 final XMLRPCClient client = new XMLRPCClient(new URL(Keys.ABUMATRAN_XMLRPC_URL));
-                final HashMap<String, String> resp = (HashMap<String,String>)client.call("<translate", params);
+                final HashMap<String, String> resp = (HashMap<String,String>)client.call("translate", params);
                 Log.d("XMLRESP", resp.get("text"));
                 return "<html>" + resp.get("text") + "</html>";
 
