@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -45,6 +47,7 @@ import dalvik.system.DexClassLoader;
 
 import android.os.AsyncTask;
 import android.text.Html;
+import android.util.Log;
 
 
 public class MtPackage extends Package {
@@ -141,6 +144,7 @@ public class MtPackage extends Package {
                 Translator.setBase(packageDir.getAbsolutePath(), getClassLoader(packageDir));
                 Translator.setMode(getId());
                 IOUtils.cacheDir = getCacheDir();
+                Log.d("OFFLINERESP", "...");
                 return "<html>" + (markUnknown ? unknownPattern.matcher(Translator.translate(text[0])).replaceAll(unknownReplacement) : Translator.translate(text[0])).replaceAll("\n", "<br/>") + "<html>";
             } catch (Exception e) {
                 exception = e;
@@ -180,6 +184,7 @@ public class MtPackage extends Package {
                 if (trgLanguage.getCountry().length() > 0) langpair += "_" + (trgLanguage.getCountry().equals("ARAN") ? "aran" : trgLanguage.getCountry());
                 final String response = new Scanner(new URL(Keys.APERTIUM_APY_URL + "/translate?langpair=" + langpair + "&q=" + URLEncoder.encode(text[0], "UTF-8")).openStream()).useDelimiter("\\A").next();
                 final String translation = Html.fromHtml(new JSONObject(response).getJSONObject("responseData").getString("translatedText")).toString();
+                Log.d("APYRESP", translation);
                 return "<html>" + unknownPattern.matcher(translation).replaceAll(markUnknown ? unknownReplacement : "$1").replaceAll("\n", "<br/>") + "<html>";
             } catch (Exception e) {
                 exception = e;
@@ -216,10 +221,24 @@ public class MtPackage extends Package {
         @Override
         protected String doInBackground(String... text) {
             try {
-                final XMLRPCClient client = new XMLRPCClient(new URL(Keys.APERTIUM_XMLRPC_URL), XMLRPCClient.FLAGS_DEFAULT_TYPE_STRING);
-                client.setTimeout(5);
-                final String translation = (String)client.call("service.translate", text[0], "txt", getId().split("-")[0], getId().split("-")[1], markUnknown, Keys.APERTIUM_API_KEY);
-                return "<html>" + (markUnknown ? unknownPattern.matcher(translation).replaceAll(unknownReplacement) : translation).replaceAll("\n", "<br/>") + "<html>";
+                // apertium XMLRPC
+//                final XMLRPCClient client = new XMLRPCClient(new URL(Keys.APERTIUM_XMLRPC_URL), XMLRPCClient.FLAGS_DEFAULT_TYPE_STRING);
+//                client.setTimeout(5);
+//                final String translation = (String)client.call("service.translate", text[0], "txt", getId().split("-")[0], getId().split("-")[1], markUnknown, Keys.APERTIUM_API_KEY);
+//                return "<html>" + (markUnknown ? unknownPattern.matcher(translation).replaceAll(unknownReplacement) : translation).replaceAll("\n", "<br/>") + "<html>";
+                //  abumatran XMLRPC
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("text", text[0]);
+                params.put("format", "txt");
+                params.put("sourceLang", getId().split("-")[0]);
+                params.put("targetLang", getId().split("-")[1]);
+                params.put("markUnknown", "0");
+                params.put("key", Keys.ABUMATRAN_API_KEY);
+                final XMLRPCClient client = new XMLRPCClient(new URL(Keys.ABUMATRAN_XMLRPC_URL));
+                final HashMap<String, String> resp = (HashMap<String,String>)client.call("<translate", params);
+                Log.d("XMLRESP", resp.get("text"));
+                return "<html>" + resp.get("text") + "</html>";
+
             } catch (Exception e) {
                 exception = e;
                 return null;
